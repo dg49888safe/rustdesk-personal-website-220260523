@@ -1,0 +1,412 @@
+<?php
+// RustDesk 极简中文下载页
+// 配置区 - 修改下载链接即可
+$config = [
+    'site_name'    => 'RustDesk',
+    'tagline'      => '快速、安全的开源远程桌面软件',
+    'description'  => '替代 TeamViewer、向日葵，享受安全可靠的远程桌面体验。支持自建服务器，数据完全自主掌控。',
+    'windows_url'  => 'https://github.com/rustdesk/rustdesk/releases/latest',
+    'android_url'  => 'https://github.com/rustdesk/rustdesk/releases/latest',
+    'version'      => '1.3.9',
+    'github_url'   => 'https://github.com/rustdesk/rustdesk',
+];
+?>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($config['site_name']) ?> - <?= htmlspecialchars($config['tagline']) ?></title>
+    <meta name="description" content="<?= htmlspecialchars($config['description']) ?>">
+    <style>
+        /* ===== 重置 & 基础样式 ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+                         "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background: #0b0f19;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ===== 动态背景光晕 ===== */
+        .bg-glow {
+            position: fixed;
+            top: -40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 900px;
+            background: radial-gradient(circle, rgba(56,139,253,0.15) 0%, rgba(56,139,253,0.05) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+        }
+
+        /* ===== 顶部导航栏 ===== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(11, 15, 25, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #388bfd, #a78bfa);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #fff;
+            font-weight: 800;
+        }
+        .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .nav-link:hover { color: #e2e8f0; }
+
+        /* ===== 主视觉区域 ===== */
+        .hero {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 160px 24px 80px;
+            min-height: 100vh;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: rgba(56,139,253,0.1);
+            border: 1px solid rgba(56,139,253,0.25);
+            color: #388bfd;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 32px;
+        }
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #388bfd;
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        h1 {
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            max-width: 700px;
+            background: linear-gradient(180deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+        }
+        .subtitle {
+            font-size: clamp(16px, 2.5vw, 20px);
+            color: #94a3b8;
+            max-width: 560px;
+            line-height: 1.7;
+            margin-bottom: 56px;
+        }
+
+        /* ===== 下载卡片 ===== */
+        .downloads {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 640px;
+        }
+        .dl-card {
+            flex: 1;
+            min-width: 260px;
+            max-width: 300px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 40px 28px 36px;
+            text-align: center;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .dl-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #388bfd, transparent);
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+        .dl-card:hover {
+            border-color: rgba(56,139,253,0.3);
+            background: rgba(56,139,253,0.06);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(56,139,253,0.1);
+        }
+        .dl-card:hover::before { opacity: 1; }
+
+        .dl-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .dl-icon.windows {
+            background: linear-gradient(135deg, rgba(0,120,215,0.15), rgba(0,120,215,0.05));
+            color: #0078d7;
+        }
+        .dl-icon.android {
+            background: linear-gradient(135deg, rgba(61,220,132,0.15), rgba(61,220,132,0.05));
+            color: #3ddc84;
+        }
+        .dl-platform {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 6px;
+        }
+        .dl-desc {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+        .dl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.25s;
+            cursor: pointer;
+        }
+        .dl-btn.win-btn {
+            background: linear-gradient(135deg, #388bfd, #1d6be0);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(56,139,253,0.3);
+        }
+        .dl-btn.win-btn:hover {
+            box-shadow: 0 6px 30px rgba(56,139,253,0.45);
+            transform: translateY(-1px);
+        }
+        .dl-btn.and-btn {
+            background: linear-gradient(135deg, #3ddc84, #2bb86a);
+            color: #0b0f19;
+            box-shadow: 0 4px 20px rgba(61,220,132,0.25);
+        }
+        .dl-btn.and-btn:hover {
+            box-shadow: 0 6px 30px rgba(61,220,132,0.4);
+            transform: translateY(-1px);
+        }
+        .dl-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ===== 特性展示 ===== */
+        .features {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 100px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .feat {
+            padding: 28px 24px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .feat:hover { border-color: rgba(255,255,255,0.12); }
+        .feat-icon {
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+        .feat-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+        }
+        .feat-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* ===== 页脚 ===== */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 32px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            color: #475569;
+            font-size: 13px;
+        }
+        footer a {
+            color: #64748b;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        footer a:hover { color: #94a3b8; }
+
+        /* ===== 移动端适配 ===== */
+        @media (max-width: 600px) {
+            .hero { padding: 140px 20px 60px; }
+            .downloads { flex-direction: column; align-items: center; }
+            .dl-card { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- 顶部导航 -->
+<header>
+    <nav>
+        <a href="#" class="logo">
+            <span class="logo-icon">R</span>
+            <?= htmlspecialchars($config['site_name']) ?>
+        </a>
+        <a href="<?= htmlspecialchars($config['github_url']) ?>" target="_blank" class="nav-link">GitHub &nearr;</a>
+    </nav>
+</header>
+
+<!-- 主视觉区域 -->
+<section class="hero">
+    <div class="badge">
+        <span class="badge-dot"></span>
+        当前版本 v<?= htmlspecialchars($config['version']) ?>
+    </div>
+
+    <h1><?= htmlspecialchars($config['tagline']) ?></h1>
+    <p class="subtitle"><?= htmlspecialchars($config['description']) ?></p>
+
+    <!-- 下载卡片 -->
+    <div class="downloads">
+        <!-- Windows 客户端 -->
+        <div class="dl-card">
+            <div class="dl-icon windows">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                    <path d="M3 12V6.5l8-1.1V12H3zm0 .5h8v6.6l-8-1.1V12.5zM12.5 12V5.2l8.5-1.2v8H12.5zm0 .5h8.5v8l-8.5-1.2V12.5z"/>
+                </svg>
+            </div>
+            <div class="dl-platform">Windows 客户端</div>
+            <div class="dl-desc">支持 Windows 7 / 10 / 11</div>
+            <a href="<?= htmlspecialchars($config['windows_url']) ?>" target="_blank" class="dl-btn win-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                立即下载
+            </a>
+        </div>
+
+        <!-- Android 客户端 -->
+        <div class="dl-card">
+            <div class="dl-icon android">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                    <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0 0 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 0 0 6 7h12c0-2.21-1.2-4.15-2.97-5.18-.05-.04-.12-.01-.16.02zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
+                </svg>
+            </div>
+            <div class="dl-platform">Android 客户端</div>
+            <div class="dl-desc">支持 Android 6.0+</div>
+            <a href="<?= htmlspecialchars($config['android_url']) ?>" target="_blank" class="dl-btn and-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                立即下载
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 特性展示 -->
+<div class="features">
+    <div class="feat">
+        <div class="feat-icon">&#128274;</div>
+        <div class="feat-title">端到端加密</div>
+        <div class="feat-desc">所有连接均经过端到端加密，确保数据传输安全</div>
+    </div>
+    <div class="feat">
+        <div class="feat-icon">&#9889;</div>
+        <div class="feat-title">极速连接</div>
+        <div class="feat-desc">优化的传输协议，低延迟、高帧率的远程体验</div>
+    </div>
+    <div class="feat">
+        <div class="feat-icon">&#127760;</div>
+        <div class="feat-title">自建服务器</div>
+        <div class="feat-desc">支持私有部署，数据完全掌控在自己手中</div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer>
+    <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($config['site_name']) ?> &mdash; 开源远程桌面软件 &nbsp;|&nbsp; <a href="<?= htmlspecialchars($config['github_url']) ?>" target="_blank">GitHub</a></p>
+</footer>
+
+</body>
+</html>
