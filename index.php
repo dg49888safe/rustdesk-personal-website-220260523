@@ -1,10 +1,11 @@
 <?php
-// RustDesk 极简中文下载页
+// RustDesk 自搭建中文下载页（非官方）
+// 因官方站不支持中国大陆地区，为方便大陆用户自建此站
 // 配置区 - 修改下载链接即可
 $config = [
     'site_name'    => 'RustDesk',
     'tagline'      => '快速、安全的开源远程桌面软件',
-    'description'  => '替代 TeamViewer、向日葵，享受安全可靠的远程桌面体验。支持自建服务器，数据完全自主掌控。',
+    'description'  => '因官方站不支持中国大陆地区，本站为自搭建 RustDesk 下载站（非官方）。方便大陆用户免翻墙下载使用，替代 TeamViewer、向日葵。',
     'windows_url'  => '/down/rustdesk-windows-x64.zip',
     'android_url'  => '/down/rustdesk-1.4.6-aarch64-unsigned.apk.zip',
     'version'      => '1.3.9',
